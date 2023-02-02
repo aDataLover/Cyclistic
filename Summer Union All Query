@@ -1,0 +1,9 @@
+create view Summer as 
+(select *
+from [dbo].[June_2022]
+union all
+select *
+from [dbo].[July_2022]
+union all
+select *
+from [dbo].[Aug_2022])

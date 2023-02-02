@@ -1,0 +1,9 @@
+create view Winter as
+(select *
+from [dbo].[Dec_2021]
+union all
+select *
+from [dbo].[Jan_2022]
+union all
+select *
+from [dbo].[Feb_2022])

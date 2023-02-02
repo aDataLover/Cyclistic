@@ -1,0 +1,100 @@
+select *
+from [dbo].[Summer]
+--2,322,579 rows
+
+select (SUM(ride_length_sec)/3600) as total_time_travelled_hr
+from [dbo].[Summer]
+select (SUM(ride_length_sec)) as total_time_travelled_sec
+from [dbo].[Summer]
+--2,445,809,489 seconds/679,391 hours
+
+
+select (AVG(ride_length_sec)/60) as avg_time_travelled_min
+from [dbo].[Summer]
+select (AVG(ride_length_sec)) as avg_time_travelled_sec
+from [dbo].[Summer]
+--1053 secs
+--17 min
+
+select (MIN(ride_length_sec)) as min_time_travelled
+from [dbo].[Summer]
+--60secs
+
+select (MAX(ride_length_sec)) as max_time_travelled
+from [dbo].[Summer]
+--4 hours
+--17985 secs
+
+select rideable_type,
+count(ride_id) as amount_per_type
+from [dbo].[Summer]
+group by rideable_type
+order by amount_per_type desc
+--classic_bike;1,133,582
+--electric_bike;1,103,966
+--docked_bike;85,031
+
+select member_casual ,
+count (member_casual)  
+from [dbo].[Summer]
+group by member_casual 
+--casual;1,106,181
+--member; 1,216,398
+
+select start_station_name,
+count (start_station_name) as num_started_journeys
+from [dbo].[Summer]
+group by start_station_name 
+order by COUNT(start_station_name) desc
+--finding most popular start station. we have random_start_point w/ 305,617 and streeter dr&grand ave 38,764
+
+select end_station_name,
+count (end_station_name) as popular_end_station
+from [dbo].[Summer]
+group by end_station_name 
+order by COUNT(end_station_name) desc
+--finding most popular end station. we have random_end_point w/ 321,968 and streeter dr&grand ave with 38,788
+
+
+select member_casual,
+count (member_casual) as total_count_membership, 
+count(*)*100.00/SUM(COUNT(*)) over() as percentage_of_membership
+from [dbo].[Summer]
+group by member_casual
+order by total_count_membership desc
+--query retuns percentage of casuals and members
+--member; 52.37
+--casual; 47.63
+
+select member_casual, rideable_type,
+sum(ride_length_sec)/3600 as total_ride_length
+from [dbo].[Summer]
+group by member_casual, rideable_type
+order by total_ride_length desc
+--query returns the sum ride length grouped for members and casuals and what type of bike they used
+
+
+select num_wkday,
+count(ride_id) as ride_count
+from [dbo].[Summer]
+group by num_wkday
+order by ride_count desc
+--query returns the number of day in the week and how many rides were in that month on that day of week
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Summer]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by year_run,month_run desc
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Summer]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by ride_count desc

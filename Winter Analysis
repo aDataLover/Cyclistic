@@ -1,0 +1,102 @@
+select *
+from [dbo].[Winter]
+--456,160 rows
+
+select (SUM(ride_length_sec)) as total_time_travelled_sec
+from [dbo].[Winter]
+select (SUM(ride_length_sec)/3600) as total_time_travelled_hr
+from [dbo].[Winter]
+--321,290,573 seconds/89247 hours
+
+
+select (AVG(ride_length_sec)) as avg_time_travelled_sec
+from [dbo].[Winter]
+select (AVG(ride_length_sec)/60) as avg_time_travelled_min
+from [dbo].[Winter]
+--704 secs
+--11 min
+
+select (MIN(ride_length_sec)) as min_time_travelled
+from [dbo].[Winter]
+--60secs
+
+select (MAX(ride_length_sec)/3600) as max_time_travelled_hr
+from [dbo].[Winter]
+select (MAX(ride_length_sec)) as max_time_travelled_secs
+from [dbo].[Winter]
+--2 hours
+--7200 secs
+
+select rideable_type,
+count(ride_id) as amount_per_type
+from [dbo].[Winter]
+group by rideable_type
+order by amount_per_type desc
+--electric_bike; 238,847
+--classic_bike; 210,552
+--docked_bike; 6,761
+
+select member_casual ,
+count (member_casual)  
+from [dbo].[Winter]
+group by member_casual 
+--member; 349,910
+--casual; 106,250
+
+select start_station_name,
+count (start_station_name) as num_started_journeys
+from [dbo].[Winter]
+group by start_station_name 
+order by num_started_journeys desc
+--finding most popular start station. we have random_start_point w/ 82,969 and kingsbury st&kinzie st 4,066
+
+select end_station_name,
+count (end_station_name) as popular_end_station
+from [dbo].[Winter]
+group by end_station_name 
+order by popular_end_station desc
+--finding most popular end station. we have random_end_point w/ 321,968 and streeter dr&grand ave with 38,788
+
+
+select member_casual,
+count (member_casual) as total_count_membership, 
+count(*)*100.00/SUM(COUNT(*)) over() as percentage_of_membership
+from [dbo].[Winter]
+group by member_casual
+order by total_count_membership desc
+--query retuns percentage of casuals and members
+--member; 76.71
+--casual; 23.29
+
+select member_casual, rideable_type,
+sum(ride_length_sec)/3600 as total_ride_length_hr
+from [dbo].[Winter]
+group by member_casual, rideable_type
+order by total_ride_length_hr desc
+--query returns the sum ride length grouped for members and casuals and what type of bike they used
+
+
+select num_wkday,
+count(ride_id) as ride_count
+from [dbo].[Winter]
+group by num_wkday
+order by ride_count desc
+--query returns the number of day in the week and how many rides were in that month on that day of week
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Winter]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by year_run,month_run desc
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Winter]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by ride_count desc

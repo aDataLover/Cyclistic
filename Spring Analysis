@@ -1,0 +1,99 @@
+select *
+from [dbo].[Spring]
+--1,262,561 rows
+
+select (SUM(ride_length_sec)) as total_time_travelled_sec
+from [dbo].[Spring]
+select (SUM(ride_length_sec)/3600) as total_time_travelled_hr
+from [dbo].[Spring]
+--1,253,893,787 seconds/348,303 hours
+
+
+select (AVG(ride_length_sec)) as avg_time_travelled_sec
+from [dbo].[Spring]
+select (AVG(ride_length_sec)/60) as avg_time_travelled_min
+from [dbo].[Spring]
+--993 secs
+--16 min
+
+select (MIN(ride_length_sec)) as min_time_travelled
+from [dbo].[Spring]
+--60secs
+
+select (MAX(ride_length_sec)/3600) as max_time_travelled
+from [dbo].[Spring]
+--4 hours
+--17983 secs
+
+select rideable_type,
+count(ride_id) as amount_per_type
+from [dbo].[Spring]
+group by rideable_type
+order by amount_per_type desc
+--classic_bike;614,519
+--electric_bike;602,558
+--docked_bike;45,484
+
+select member_casual ,
+count (member_casual)  
+from [dbo].[Spring]
+group by member_casual 
+--casual;485,219
+--member;777,342
+
+select start_station_name,
+count (start_station_name) as num_started_journeys
+from [dbo].[Spring]
+group by start_station_name 
+order by COUNT(start_station_name) desc
+--finding most popular start station. we have random_start_point w/ 197813 and streeter dr&grand ave 16590
+
+select end_station_name,
+count (end_station_name) as popular_end_station
+from [dbo].[Spring]
+group by end_station_name 
+order by COUNT(end_station_name) desc
+--finding most popular end station. we have random_end_point w/ 209,354 and streeter dr&grand ave with 16,830
+
+select member_casual,
+count (member_casual) as total_count_membership, 
+count(*)*100.00/SUM(COUNT(*)) over() as percentage_of_membership
+from [dbo].[Spring]
+group by member_casual
+order by total_count_membership desc
+--query retuns percentage of casuals and members
+--member; 61.57
+--casual; 38.43
+
+select member_casual, rideable_type,
+sum(ride_length_sec)/3600 as total_ride_length_hr
+from [dbo].[Spring]
+group by member_casual, rideable_type
+order by total_ride_length_hr desc
+--query returns the sum ride length grouped for members and casuals and what type of bike they used
+
+
+select num_wkday,
+count(ride_id) as ride_count
+from [dbo].[Spring]
+group by num_wkday
+order by ride_count desc
+--query returns the number of day in the week and how many rides were in that month on that day of week
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Spring]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by year_run,month_run desc
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Spring]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by ride_count desc

@@ -1,0 +1,9 @@
+create view Autumn as
+(select *
+from [dbo].[Sep_2021]
+union all
+select *
+from [dbo].[Oct_2021]
+union all
+select *
+from [dbo].[Nov_2021])

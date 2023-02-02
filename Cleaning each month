@@ -1,0 +1,131 @@
+--after altering the table and adding the ride_length column and calculating its values, next is to explore the table.
+select *
+from [dbo].[Nov_2021]
+where ride_length_sec not between 60 and 18000
+
+--6442 rows of data where ride_length is below 60 and above 18000. these need to be deleted as it will skew results
+
+delete from [dbo].[Nov_2021]
+where ride_length_sec not between 60 and 18000 
+
+--the table has several blank spaces in the start and end station names and ids. this needs to be updated as deleting the rows will 
+--skew analysis results. i will make an assumption that it is cause the bikes were started at and ended at random points. 
+--i will put place holders for these values. 'random_start_point' as start_station_id and '1111' for start_station_id and 
+--'random_end_point' for end_station_name and '2222' for end_station_id. this can only happen to values where there is present 
+--start_lat, start_lng, end_lat,end_lng.
+
+--let's investigate
+select *
+from [dbo].[Nov_2021]
+where end_station_name is null and
+end_lng is null
+--this query has drawn up 20 rows of data
+
+select *
+from [dbo].[Nov_2021]
+where start_station_name is null and
+start_lat is null
+--no rows for this query are found
+
+select *
+from [dbo].[Nov_2021]
+where start_station_name is null and
+start_lng is null
+--no rows of data were found for this query. same queries were done comparing start_station_id to start_lng and start_lat. no rows
+--were pulled. i did these querries just to be sure. during data input, a value could be missed skewing data analysis.
+
+select *
+from [dbo].[Nov_2021]
+where end_station_id is null and
+end_lat is null
+--20 rows of data were pulled which need to be deleted. 
+
+delete [dbo].[Nov_2021]
+where end_station_id is null and
+end_lat is null
+
+update [dbo].[Nov_2021]
+set start_station_name='random_start_point'
+where start_station_name is null
+
+update [dbo].[Nov_2021]
+set start_station_id='1111',
+end_station_name= 'random_end_point' ,
+end_station_id='2222' 
+where (start_station_id is null and
+end_station_name is null and
+end_station_id is null)
+
+--28,046 rows containing null values for end_station_name & end_station_id were left from the update. i don't know why.
+--so i will run another update specifically for these rows
+update [dbo].[Nov_2021]
+set end_station_name='random_end_point',
+end_station_id='2222'
+where end_station_name is null and
+end_station_id is null
+
+
+--our data in this table is clean! i feel really good. this is my first data cleaned table.
+
+--extracting the datepart from ended_at column
+select DATEFROMPARTS(year(ended_at),month(ended_at),day(ended_at)) as yyyy_mm_dd
+from [dbo].[Nov_2021]
+
+--adding a column to table so that i can calculate the day of the week rides took place. used the ended_at 
+--column incase any rides started before midnight and ended the next day.
+alter table [dbo].[Nov_2021]
+add yyyy_mm_dd date
+
+--calculation to fill new column 
+update [dbo].[Nov_2021]
+set yyyy_mm_dd = (select (DATEFROMPARTS(year(ended_at),month(ended_at),day(ended_at)))) 
+
+--query to get the days of the week the dates fall on
+--thought of needing to go back and 
+select FORMAT(ended_at,'dddd') as day_of_week ,
+	DATEPART(weekday,ended_at) as num_wkday
+from [dbo].[Nov_2021]
+
+--dropping column yyyy_mm_dd because i can use the column ended_at
+alter table [dbo].[Nov_2021]
+drop column yyyy_mm_dd
+
+--altering table to add column day_of_week and num_wkday 
+alter table [dbo].[Nov_2021]
+add day_of_week nvarchar(max)
+
+alter table [dbo].[202111-divvy-tripdata]
+add num_wkday int
+
+update [dbo].[Nov_2021]
+set day_of_week = (select FORMAT(ended_at,'dddd')),
+	num_wkday = (DATEPART(weekday,ended_at)) 
+
+--need to confirm if any station has the wrong station_id. the query below brings up 817 rows while the one below it brings up 816 
+--rows of data. there is a discrepancy which needs to be investigated 
+select distinct start_station_name
+from [dbo].[Nov_2021]
+
+select distinct start_station_id
+from [dbo].[Nov_2021]
+
+alter table [dbo].[Nov_2021]
+alter column ride_length_sec bigint 
+
+select *
+from [dbo].[Nov_2021]
+
+select start_station_name,start_station_id
+from [dbo].[Nov_2021]
+where start_station_id not in
+(select distinct start_station_id
+from [dbo].[Nov_2021] )
+--none. query took 46:12 to complete
+
+select *
+from [dbo].[Nov_2021]
+where ride_length_sec>10800
+--291 rows
+
+delete from [dbo].[Nov_2021]
+where ride_length_sec>10800

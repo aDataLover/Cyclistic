@@ -1,0 +1,91 @@
+select *
+from [dbo].[Cyclistic]
+--5,623,601 rows
+
+select (SUM(ride_length_sec)/3600) as total_time_travelled
+from [dbo].[Cyclistic]
+--5,380,773,351 seconds/1,494,659 hours
+
+select (AVG(ride_length_sec)/60) as avg_time_travelled
+from [dbo].[Cyclistic]
+--15 min
+
+select (MIN(ride_length_sec)) as min_time_travelled
+from [dbo].[Cyclistic]
+--60 secs
+
+select (MAX(ride_length_sec)) as max_time_travelled
+from [dbo].[Cyclistic]
+--17985 
+
+select rideable_type
+from [dbo].[Cyclistic]
+group by rideable_type
+--three types; classic_bike, docked_bike, electric_bike
+
+select member_casual ,
+count (member_casual)  
+from [dbo].[Cyclistic]
+group by member_casual 
+--casual 2,295,358
+--memeber 3,328,243
+
+select start_station_name,
+count (start_station_name) as num_started_journeys
+from [dbo].[Cyclistic]
+group by start_station_name 
+order by COUNT(start_station_name) desc
+--finding most popular start station. we have random_start_point w/ 831,714 and streeter dr&grand ave 73779
+
+select end_station_name,
+count (end_station_name) as popular_end_station
+from [dbo].[Cyclistic]
+group by end_station_name 
+order by COUNT(end_station_name) desc
+--finding most popular end station. we have random_end_point w/ 823,460 and streeter dr&grand ave with 74,507
+
+
+select rideable_type, member_casual,
+count (ride_length_sec)/3600 as total_time_length
+from [dbo].[Cyclistic]
+group by member_casual, rideable_type 
+--this query returns a table that has grouped member_casual and riedeable_type into how much time users use 
+--on each of these bikes
+
+select member_casual,
+count (member_casual) as total_count_membership, 
+count(*)*100.00/SUM(COUNT(*)) over() as percentage_of_membership
+from [dbo].[Cyclistic]
+group by member_casual
+--query retuns percentage of casuals and members
+
+select member_casual, rideable_type,
+max(ride_length_sec) as max_ride_length_member
+from [dbo].[Cyclistic]
+group by member_casual, rideable_type
+--query returns the max ride length grouped for members and casuals and what type of bike they used
+
+--needing to group the months into different seasons to draw up insights. immediately, one can't ride a bike in winter
+--for 18000 seconds
+
+select member_casual, num_wkday,
+max(num_wkday) as popular_bike_date
+from [dbo].[Cyclistic]
+group by member_casual, num_wkday
+order by num_wkday desc
+
+select member_casual, count(datename(month,ended_at)) as months,
+count (ride_id)as total_rides
+from [dbo].[Cyclistic]
+group by member_casual, ended_at
+order by total_rides, months desc 
+
+
+select
+DATEPART(year, CAST(ended_at as date)) as year_run, 
+DATEPART(month,CAST(ended_at as date)) as month_run,
+COUNT(ride_id) as ride_count 
+from [dbo].[Cyclistic]
+group by datepart(year, cast(ended_at as date)),
+datepart(month,cast(ended_at as date))
+order by ride_count desc

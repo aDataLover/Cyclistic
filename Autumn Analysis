@@ -1,0 +1,103 @@
+select *
+from [dbo].[Autumn]
+--1,713,882 rows
+
+select (SUM(ride_length_sec)/3600) as total_time_travelled
+from [dbo].[Autumn]
+--1,652,238,935 seconds/458,955 hours
+
+
+select (AVG(ride_length_sec)/60) as avg_time_travelled
+from [dbo].[Autumn]
+--964 secs
+--16 min
+
+select (MIN(ride_length_sec)) as min_time_travelled
+from [dbo].[Autumn]
+--60secs
+
+select (MAX(ride_length_sec)) as max_time_travelled
+from [dbo].[Autumn]
+--3 hours
+--10800 secs
+
+select rideable_type,
+count(ride_id) as amount_per_type
+from [dbo].[Autumn]
+group by rideable_type
+order by amount_per_type desc
+--classic_bike;917608
+--electric_bike;732994
+--docked_bike;63280
+
+select member_casual ,
+count (member_casual)  
+from [dbo].[Autumn]
+group by member_casual 
+--casual;713,091
+--member;1,000,791
+
+select start_station_name,
+count (start_station_name) as num_started_journeys
+from [dbo].[Autumn]
+group by start_station_name 
+order by COUNT(start_station_name) desc
+--finding most popular start station. we have random_start_point w/ 269191 and streeter dr&grand ave 19219
+
+select end_station_name,
+count (end_station_name) as popular_end_station
+from [dbo].[Autumn]
+group by end_station_name 
+order by COUNT(end_station_name) desc
+--finding most popular end station. we have random_end_point w/ 282750 and streeter dr&grand ave with 19506
+
+
+select rideable_type, member_casual,
+count (ride_length_sec)/3600 as total_time_length
+from [dbo].[Autumn]
+group by member_casual, rideable_type 
+--this query returns a table that has grouped member_casual and riedeable_type into how much time users use 
+--on each of these bikes
+
+select member_casual,
+count (member_casual) as total_count_membership, 
+count(*)*100.00/SUM(COUNT(*)) over() as percentage_of_membership
+from [dbo].[Autumn]
+group by member_casual
+order by total_count_membership desc
+--query retuns percentage of casuals and members
+--member; 58.39
+--casual; 41.06
+
+select member_casual, rideable_type,
+sum(ride_length_sec)/3600 as sum_ride_length_hr
+from [dbo].[Autumn]
+group by member_casual, rideable_type
+order by sum_ride_length_hr desc
+--query returns the max ride length grouped for members and casuals and what type of bike they used
+
+
+select num_wkday,
+count(ride_id) as ride_count
+from [dbo].[Autumn]
+group by num_wkday
+order by ride_count desc
+--query returns the number of day in the week and how many rides were in that month on that day of week
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Autumn]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by year_run,month_run
+
+select 
+DATEPART(year,cast(ended_at as date)) as year_run,
+DATEPART(month,CAST(ended_at as date)) as month_run,
+count(ride_id) as ride_count
+from [dbo].[Autumn]
+group by DATEPART(year,cast(ended_at as date)),
+DATEPART(month,cast(ended_at as date))
+order by ride_count desc
